@@ -1,0 +1,64 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - 'releases/**'
+  pull_request:
+    branches:
+      - '*'
+
+jobs:
+  Linux:
+    runs-on: ubuntu-latest-xl
+    steps:
+    - name: Check out repository
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 1
+    - name: Install Graphviz
+      run: |
+        sudo apt-get update
+        sudo apt-get install graphviz
+    - name: Install GraalVM
+      uses: graalvm/setup-graalvm@v1
+      with:
+        version: 'latest'
+        java-version: '17'
+        components: 'native-image'
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+    - name: Build
+      uses: ./.github/actions/main-build
+      with:
+        arguments: |
+          -Ptesting.enableJaCoCo
+          build
+          jacocoRootReport
+          prepareDocsForUploadToGhPages
+  Linux-Standard-Galaxy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out repository
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 1
+    - name: Install Graphviz
+      run: |
+        sudo apt-get update
+        sudo apt-get install graphviz
+    - name: Install GraalVM
+      uses: graalvm/setup-graalvm@v1
+      with:
+        version: 'latest'
+        java-version: '17'
+        components: 'native-image'
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+    - name: Build
+      uses: ./.github/actions/main-build
+      with:
+        arguments: |
+          -Ptesting.enableJaCoCo
+          build
+          jacocoRootReport
+          prepareDocsForUploadToGhPages
